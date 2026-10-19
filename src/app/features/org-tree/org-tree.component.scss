@@ -1,0 +1,137 @@
+:host {
+  display: block;
+}
+
+.class-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.class-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bible-gold);
+  margin: 8px 0 0;
+}
+
+.subject-card {
+  background: var(--bible-card-bg);
+  color: var(--bible-dark);
+  border: 1px solid var(--bible-card-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+
+  &.open .chevron {
+    transform: rotate(180deg);
+  }
+}
+
+.subject-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  color: inherit;
+  text-align: left;
+
+  &:hover {
+    background: var(--amber-100);
+  }
+}
+
+.subject-icon {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--amber-100);
+  color: var(--amber-600);
+}
+
+.subject-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.subject-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.subject-meta {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.chevron {
+  font-size: 12px;
+  color: var(--amber-600);
+  transition: transform 0.2s ease;
+}
+
+.chapters {
+  list-style: none;
+  margin: 0;
+  padding: 4px 14px 10px 58px;
+  border-top: 1px solid var(--bible-card-border);
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    padding: 7px 0;
+    border-bottom: 1px dashed var(--bible-card-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.inactive,
+    &.unfiled {
+      color: #64748b;
+    }
+
+    &.unfiled span:first-child {
+      font-style: italic;
+    }
+
+    &.empty {
+      color: #64748b;
+    }
+  }
+}
+
+.count {
+  flex: none;
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--amber-900);
+  background: var(--amber-100);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.empty-line {
+  font-size: 12px;
+  color: var(--emerald-200);
+  margin: 0;
+}

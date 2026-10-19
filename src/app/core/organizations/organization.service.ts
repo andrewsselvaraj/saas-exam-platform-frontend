@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { OrgTree } from './org-tree';
 import { Organization } from './organization';
 
 /**
@@ -13,5 +14,9 @@ export class OrganizationService {
 
   list(): Observable<Organization[]> {
     return this.http.get<Organization[]>('/api/orgs');
+  }
+
+  tree(orgId: string): Observable<OrgTree> {
+    return this.http.get<OrgTree>(`/api/orgs/${encodeURIComponent(orgId)}/tree`);
   }
 }

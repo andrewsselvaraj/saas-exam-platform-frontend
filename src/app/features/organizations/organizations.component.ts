@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
+import { describeHttpError } from '../../core/http-error';
 import { Organization } from '../../core/organizations/organization';
 import { OrganizationService } from '../../core/organizations/organization.service';
 
@@ -33,11 +34,7 @@ export class OrganizationsComponent implements OnInit {
         this.state.set('loaded');
       },
       error: (err: HttpErrorResponse) => {
-        this.errorMessage.set(
-          err.status === 0 || err.status >= 500
-            ? 'The exam service is not reachable right now.'
-            : `The server answered ${err.status}.`,
-        );
+        this.errorMessage.set(describeHttpError(err));
         this.state.set('error');
       },
     });

@@ -1,0 +1,88 @@
+<div class="page">
+  <header class="top-bar">
+    <a class="icon-btn" routerLink="/organizations" aria-label="Back to organisations">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div class="page-title">
+      <h1>{{ tree()?.name ?? 'Organisation' }}</h1>
+      @if (tree(); as t) {
+        <p>{{ plural(t.classes.length, 'class', 'classes') }} · {{ plural(totalQuestions(), 'question') }}</p>
+      }
+    </div>
+    <span class="title-spacer"></span>
+  </header>
+
+  <main class="list-content">
+    @switch (state()) {
+      @case ('loading') {
+        <p class="state-message"><i class="fa-solid fa-spinner fa-spin"></i> Loading classes…</p>
+      }
+      @case ('error') {
+        <div class="state-message">
+          <p>{{ errorMessage() }}</p>
+          <button type="button" class="retry-btn" (click)="load()">Try again</button>
+        </div>
+      }
+      @case ('loaded') {
+        @for (schoolClass of tree()!.classes; track schoolClass.id) {
+          <section class="class-section">
+            <h2 class="class-name">
+              <i class="fa-solid fa-users"></i>
+              {{ schoolClass.name }}
+              @if (schoolClass.status !== 'A') {
+                <span class="status-pill inactive">Inactive</span>
+              }
+            </h2>
+
+            @for (subject of schoolClass.subjects; track subject.id) {
+              <div class="subject-card" [class.open]="expanded().has(subject.id)">
+                <button
+                  type="button"
+                  class="subject-head"
+                  [attr.aria-expanded]="expanded().has(subject.id)"
+                  (click)="toggle(subject.id)"
+                >
+                  <span class="subject-icon"><i class="fa-solid fa-book-bible"></i></span>
+                  <span class="subject-body">
+                    <span class="subject-name">{{ subject.name }}</span>
+                    <span class="subject-meta">
+                      {{ plural(subject.questionCount, 'question') }} · {{ plural(subject.chapters.length, 'chapter') }}
+                    </span>
+                  </span>
+                  @if (subject.status !== 'A') {
+                    <span class="status-pill inactive">Inactive</span>
+                  }
+                  <i class="fa-solid fa-chevron-down chevron"></i>
+                </button>
+
+                @if (expanded().has(subject.id)) {
+                  <ul class="chapters">
+                    @for (chapter of subject.chapters; track chapter.id) {
+                      <li [class.inactive]="chapter.status !== 'A'">
+                        <span>{{ chapter.name }}</span>
+                        <span class="count">{{ chapter.questionCount }}</span>
+                      </li>
+                    }
+                    @if (subject.unfiledQuestionCount > 0) {
+                      <li class="unfiled">
+                        <span>Not in a chapter</span>
+                        <span class="count">{{ subject.unfiledQuestionCount }}</span>
+                      </li>
+                    }
+                    @if (subject.chapters.length === 0 && subject.unfiledQuestionCount === 0) {
+                      <li class="empty">No chapters or questions yet.</li>
+                    }
+                  </ul>
+                }
+              </div>
+            } @empty {
+              <p class="empty-line">No subjects yet.</p>
+            }
+          </section>
+        } @empty {
+          <p class="state-message">This organisation has no classes yet.</p>
+        }
+      }
+    }
+  </main>
+</div>

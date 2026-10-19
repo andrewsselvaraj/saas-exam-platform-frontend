@@ -76,3 +76,74 @@ button {
     color: var(--bible-gold);
   }
 }
+
+.page-title {
+  text-align: center;
+
+  h1 {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  p {
+    font-size: 11px;
+    color: var(--emerald-300);
+    margin: 2px 0 0;
+  }
+}
+
+// Balances the back button so the title stays centred.
+.title-spacer {
+  width: 18px;
+}
+
+.list-content {
+  flex: 1;
+  padding: 4px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Loading, error and empty states.
+.state-message {
+  text-align: center;
+  font-size: 13px;
+  color: var(--emerald-200);
+  margin: 48px 0 0;
+
+  p {
+    margin: 0 0 12px;
+  }
+}
+
+.retry-btn {
+  background: var(--bible-gold);
+  color: var(--bible-dark);
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+
+  &:hover {
+    background: var(--bible-gold-hover);
+  }
+}
+
+// Active / Inactive tag for catalog rows (status 'A' / 'I').
+.status-pill {
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #d1fae5;
+  color: var(--emerald-800);
+
+  &.inactive {
+    background: #e2e8f0;
+    color: #475569;
+  }
+}
