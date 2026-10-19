@@ -1,0 +1,46 @@
+:root {
+  --bible-dark: #0d2822;
+  --bible-green: #143d34;
+  --bible-green-border: #1e5246;
+  --bible-gold: #d4af37;
+  --bible-gold-hover: #b89628;
+  --bible-gold-light: #dca842;
+  --bible-card-bg: #fcf8f0;
+  --bible-card-border: #eedfbe;
+  --emerald-200: #a7f3d0;
+  --emerald-300: #6ee7b7;
+  --emerald-400: #34d399;
+  --emerald-600: #059669;
+  --emerald-800: #065f46;
+  --emerald-900: #064e3b;
+  --amber-100: #fef3c7;
+  --amber-600: #d97706;
+  --amber-800: #92400e;
+  --amber-900: #78350f;
+
+  --font-serif: 'Cinzel', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+body {
+  background-color: #050e0c;
+  color: #fff;
+  font-family: var(--font-sans);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}

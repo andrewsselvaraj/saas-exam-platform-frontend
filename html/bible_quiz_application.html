@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Quiz Mobile App</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'bible-dark': '#0d2822',
+                        'bible-green': '#143d34',
+                        'bible-gold': '#d4af37',
+                        'bible-gold-hover': '#b89628',
+                        'bible-gold-light': '#dca842',
+                        'bible-card-bg': '#fcf8f0',
+                        'bible-card-border': '#eedfbe',
+                        'correct-bg': '#d1fae5',
+                        'correct-border': '#10b981',
+                        'correct-text': '#065f46',
+                        'incorrect-bg': '#fee2e2',
+                        'incorrect-border': '#ef4444',
+                        'incorrect-text': '#991b1b',
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'Georgia', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #050e0c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 10px;
+        }
+
+        /* Screen Switcher Controls for Web Demo */
+        .demo-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .demo-nav button {
+            background: #143d34;
+            color: #d4af37;
+            border: 1px solid #1e5246;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .demo-nav button.active, .demo-nav button:hover {
+            background: #d4af37;
+            color: #0d2822;
+        }
+
+        /* Mobile Viewport Container */
+        .mobile-frame {
+            width: 380px;
+            height: 760px;
+            background-color: #0d2822;
+            border-radius: 36px;
+            border: 8px solid #1a3a32;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 175, 55, 0.15);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .screen::-webkit-scrollbar {
+            width: 4px;
+        }
+        .screen::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .screen::-webkit-scrollbar-thumb {
+            background: #1e5246;
+            border-radius: 2px;
+        }
+
+        /* Option selection dynamics */
+        .quiz-option {
+            transition: all 0.2s ease;
+        }
+
+        .badge-box {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        /* Score Gauge CSS */
+        .progress-circle {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: conic-gradient(#d4af37 0% 80%, #1e5246 80% 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .progress-circle-inner {
+            width: 86px;
+            height: 86px;
+            background-color: #0d2822;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sparkle {
+            position: absolute;
+            color: #d4af37;
+            font-size: 12px;
+            animation: pulseSparkle 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseSparkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Demo Navigation Controls -->
+    <div class="demo-nav">
+        <button id="btn-screen1" class="active" onclick="showScreen('screen-landing')">1. Bible Quiz Dashboard</button>
+        <button id="btn-screen2" onclick="showScreen('screen-instructions')">2. Quiz Instructions</button>
+        <button id="btn-screen3" onclick="showScreen('screen-quiz')">3. Question View</button>
+        <button id="btn-screen4" onclick="showScreen('screen-results')">4. Results View</button>
+    </div>
+
+    <!-- Mobile Screen Frame Container -->
+    <div class="mobile-frame">
+
+        <!-- SCREEN 1: BIBLE QUIZ LANDING PAGE -->
+        <div id="screen-landing" class="screen active bg-bible-dark text-white">
+            <div class="p-4 flex items-center justify-between">
+                <button class="text-white hover:text-bible-gold transition-colors text-lg" onclick="alert('Navigating back...')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="text-[11px] bg-bible-green px-2.5 py-1 rounded-full text-emerald-300 font-medium border border-emerald-800">
+                    Bible Mode
+                </div>
+            </div>
+
+            <div class="px-5 pb-20 flex-1 flex flex-col">
+                <div class="text-center my-3">
+                    <div class="text-bible-gold text-4xl mb-2">
+                        <i class="fa-solid fa-cross"></i>
+                    </div>
+                    <h1 class="font-serif text-3xl font-bold tracking-wide text-white mb-1">Bible Quiz</h1>
+                    <p class="text-xs text-emerald-200 tracking-wide font-medium">Test Your Knowledge. Grow In The Word.</p>
+                </div>
+
+                <div class="space-y-3 my-4">
+                    <button onclick="showScreen('screen-instructions')" class="w-full bg-bible-gold-light hover:bg-bible-gold text-bible-dark font-bold py-3 px-4 rounded-xl shadow-lg transition-colors text-sm tracking-wide">
+                        Start Today's Quiz
+                    </button>
+                    <button onclick="showScreen('screen-instructions')" class="w-full bg-transparent hover:bg-bible-green text-white border border-emerald-600 font-semibold py-3 px-4 rounded-xl transition-colors text-sm">
+                        Explore Quiz
+                    </button>
+                </div>
+
+                <div class="bg-bible-card-bg text-bible-dark rounded-2xl p-4 my-2 border border-bible-card-border shadow-md">
+                    <div class="flex items-center gap-2 text-bible-gold font-bold text-xs uppercase tracking-wider mb-2">
+                        <span>✦</span> Verse Of The Day
+                    </div>
+                    <blockquote class="italic font-serif text-sm text-amber-900 leading-relaxed mb-3">
+                        "I Can Do All Things Through Christ Who Strengthens Me."
+                    </blockquote>
+                    <p class="text-xs text-amber-800 font-semibold text-right">— Philippians 4:13</p>
+                </div>
+
+                <div class="bg-bible-green rounded-2xl p-4 my-2 border border-emerald-800 shadow-md">
+                    <span class="text-[10px] font-bold tracking-widest text-emerald-300 uppercase block mb-1">UPCOMING</span>
+                    <h3 class="font-semibold text-base text-white mb-1">Sunday Bible Challenge</h3>
+                    <p class="text-xs text-emerald-200 mb-3">This Sunday · 7:00 PM · 50 Questions</p>
+                    <button onclick="showScreen('screen-instructions')" class="bg-bible-gold hover:bg-bible-gold-hover text-bible-dark font-bold text-xs py-2 px-4 rounded-lg transition-colors">
+                        View Event
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mt-2">
+                    <div class="bg-bible-card-bg text-bible-dark rounded-xl p-3 flex items-center justify-center gap-2 border border-bible-card-border shadow-sm cursor-pointer hover:bg-amber-100 transition-colors" onclick="showScreen('screen-results')">
+                        <span class="text-amber-600"><i class="fa-solid fa-trophy"></i></span>
+                        <span class="font-bold text-xs">Leaderboard</span>
+                    </div>
+                    <div class="bg-bible-card-bg text-bible-dark rounded-xl p-3 flex items-center justify-center gap-2 border border-bible-card-border shadow-sm cursor-pointer hover:bg-amber-100 transition-colors" onclick="alert('Rewards screen')">
+                        <span class="text-amber-600"><i class="fa-solid fa-gift"></i></span>
+                        <span class="font-bold text-xs">Rewards</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="absolute bottom-0 left-0 right-0 bg-bible-dark border-t border-emerald-900/60 py-2 px-6 flex justify-between items-center z-10">
+                <button onclick="switchTab('home')" class="nav-tab flex flex-col items-center gap-1 text-emerald-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button onclick="switchTab('bible')" class="nav-tab flex flex-col items-center gap-1 text-bible-gold font-bold">
+                    <i class="fa-solid fa-book-bible text-lg"></i>
+                    <span class="text-[10px]">Bible</span>
+                </button>
+                <button onclick="switchTab('exams')" class="nav-tab flex flex-col items-center gap-1 text-emerald-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-graduation-cap text-lg"></i>
+                    <span class="text-[10px] font-medium">Exams</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: QUIZ INSTRUCTIONS -->
+        <div id="screen-instructions" class="screen bg-bible-dark text-white">
+            <div class="p-4 flex items-center border-b border-emerald-900/40">
+                <button class="text-white hover:text-bible-gold transition-colors" onclick="showScreen('screen-landing')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="flex-1 text-center">
+                    <h2 class="font-serif font-bold text-base text-white">Who Knows the Word?</h2>
+                    <p class="text-[10px] text-emerald-300">10 Questions · 10 Minutes · 100 Points</p>
+                </div>
+                <div class="w-4"></div>
+            </div>
+
+            <div class="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                    <div class="bg-bible-card-bg text-bible-dark rounded-xl p-3 flex justify-around items-center my-2 shadow-sm border border-bible-card-border">
+                        <div class="flex flex-col items-center gap-1">
+                            <i class="fa-solid fa-list-check text-bible-gold-hover text-base"></i>
+                            <span class="text-[11px] font-bold">25 Questions</span>
+                        </div>
+                        <div class="h-8 w-px bg-amber-200"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <i class="fa-regular fa-clock text-bible-gold-hover text-base"></i>
+                            <span class="text-[11px] font-bold">30 Minutes</span>
+                        </div>
+                        <div class="h-8 w-px bg-amber-200"></div>
+                        <div class="flex flex-col items-center gap-1">
+                            <i class="fa-solid fa-award text-bible-gold-hover text-base"></i>
+                            <span class="text-[11px] font-bold">50 Marks</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-bible-card-bg text-bible-dark rounded-2xl p-5 my-4 border border-bible-card-border shadow-md">
+                        <h3 class="font-bold text-lg mb-4 text-slate-800">How it works</h3>
+                        <ol class="space-y-4 text-xs leading-relaxed font-medium text-slate-700">
+                            <li class="flex items-start gap-3">
+                                <span class="font-bold text-amber-900">1.</span>
+                                <span>Answer 10 Bible trivia questions</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="font-bold text-amber-900">2.</span>
+                                <span>Each correct answer earns 10 Faith Points</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="font-bold text-amber-900">3.</span>
+                                <span>Complete before the timer runs out</span>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="font-bold text-amber-900">4.</span>
+                                <span>Your score is added to the church leaderboard</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="w-full bg-bible-gold-light hover:bg-bible-gold text-bible-dark font-bold py-3.5 px-4 rounded-xl shadow-lg transition-colors text-sm mb-2">
+                    Begin Quiz
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: QUESTION VIEW -->
+        <div id="screen-quiz" class="screen bg-bible-card-bg text-bible-dark">
+            <div class="bg-bible-dark text-white p-4 flex items-center justify-between border-b border-emerald-900">
+                <button class="text-white hover:text-bible-gold transition-colors" onclick="showScreen('screen-instructions')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="text-center">
+                    <h2 id="category-title" class="font-serif font-bold text-sm text-white">Old Testament</h2>
+                    <p id="question-tracker" class="text-[11px] text-emerald-300">Questions 01/25</p>
+                </div>
+                <div class="bg-amber-100 text-amber-900 border border-amber-300 px-3 py-1 rounded-full text-xs font-bold tracking-wider" id="quiz-timer">
+                    01:00
+                </div>
+            </div>
+
+            <div class="p-5 flex-1 flex flex-col justify-between overflow-y-auto">
+                <div>
+                    <h3 id="question-text" class="font-serif font-bold text-slate-800 text-base leading-snug mb-6">
+                        Who baptized Jesus in the Jordan River?
+                    </h3>
+
+                    <div id="options-container" class="space-y-3"></div>
+                </div>
+
+                <div class="mt-6 pt-2">
+                    <button id="action-btn" onclick="handleQuizAction()" class="w-full bg-bible-gold-light hover:bg-bible-gold text-bible-dark font-bold py-3.5 px-4 rounded-xl shadow transition-colors text-sm">
+                        Confirm Answer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: RESULTS VIEW -->
+        <div id="screen-results" class="screen bg-bible-dark text-white">
+            <div class="p-4 flex items-center">
+                <button class="text-white hover:text-bible-gold transition-colors" onclick="showScreen('screen-landing')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <div class="px-5 py-2 flex-1 flex flex-col justify-between text-center">
+                <div>
+                    <h2 class="font-serif text-2xl font-bold text-white mb-6">Well done!</h2>
+
+                    <div class="relative py-2">
+                        <span class="sparkle" style="top: 0px; left: 100px;">✦</span>
+                        <span class="sparkle" style="top: 20px; right: 90px;">✦</span>
+                        <span class="sparkle" style="bottom: 10px; left: 90px;">✦</span>
+                        <span class="sparkle" style="bottom: 0px; right: 100px;">✦</span>
+
+                        <div id="result-progress-ring" class="progress-circle">
+                            <div class="progress-circle-inner">
+                                <span id="res-score-num" class="font-serif font-bold text-2xl text-white">20</span>
+                                <span class="text-xs text-emerald-300 font-medium">/25</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-emerald-200 mt-4 mb-6">Keep learning, keep growing.</p>
+
+                    <div class="grid grid-cols-2 gap-4 max-w-xs mx-auto mb-6">
+                        <div>
+                            <div id="res-faith-points" class="font-bold text-xl text-bible-gold">+80</div>
+                            <div class="text-[11px] text-emerald-300">Faith Points</div>
+                        </div>
+                        <div>
+                            <div id="res-accuracy-val" class="font-bold text-xl text-bible-gold">80%</div>
+                            <div class="text-[11px] text-emerald-300">Accuracy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    <button onclick="restartQuiz()" class="w-full bg-bible-gold-light hover:bg-bible-gold text-bible-dark font-bold py-3.5 px-4 rounded-xl shadow-lg transition-colors text-sm">
+                        Try Another Quiz
+                    </button>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="showScreen('screen-landing')" class="bg-bible-green hover:bg-emerald-800 text-emerald-100 border border-emerald-700 font-semibold py-3 px-3 rounded-xl transition-colors text-xs">
+                            Back To Bible Quiz
+                        </button>
+                        <button onclick="alert('Church Leaderboard:\n1. Mark S. - 250 pts\n2. Sarah P. - 220 pts\n3. You - 180 pts')" class="bg-bible-green hover:bg-emerald-800 text-emerald-100 border border-emerald-700 font-semibold py-3 px-3 rounded-xl transition-colors text-xs">
+                            Leaderboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Controller Logic JS -->
+    <script>
+        const quizQuestions = [
+            {
+                category: "Old Testament",
+                question: "Who baptized Jesus in the Jordan River?",
+                options: ["Peter", "Jhon the baptist", "Matthew", "James"],
+                correctIndex: 1
+            },
+            {
+                category: "Old Testament",
+                question: "How many days did Jesus fast in the wilderness?",
+                options: ["30 days", "7 days", "40 days", "3 days"],
+                correctIndex: 2
+            },
+            {
+                category: "General Bible",
+                question: "Which book in the Bible comes right after the four Gospels?",
+                options: ["Romans", "Acts of the Apostles", "Revelation", "Hebrews"],
+                correctIndex: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let selectedOptionIndex = null;
+        let isAnswerConfirmed = false;
+        let userScore = 0;
+        let timerInterval = null;
+        let timeLeft = 60;
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            document.getElementById(screenId).classList.add('active');
+
+            const navMap = {
+                'screen-landing': 'btn-screen1',
+                'screen-instructions': 'btn-screen2',
+                'screen-quiz': 'btn-screen3',
+                'screen-results': 'btn-screen4'
+            };
+
+            document.querySelectorAll('.demo-nav button').forEach(btn => btn.classList.remove('active'));
+            if(navMap[screenId]) {
+                document.getElementById(navMap[screenId]).classList.add('active');
+            }
+
+            if (screenId !== 'screen-quiz') {
+                clearInterval(timerInterval);
+            }
+        }
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            userScore = 0;
+            showScreen('screen-quiz');
+            loadQuestion();
+            startTimer();
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        function loadQuestion() {
+            const q = quizQuestions[currentQuestionIndex];
+            selectedOptionIndex = null;
+            isAnswerConfirmed = false;
+
+            document.getElementById('category-title').innerText = q.category;
+            document.getElementById('question-tracker').innerText = `Questions 0${currentQuestionIndex + 1}/25`;
+            document.getElementById('question-text').innerText = q.question;
+
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const optionBadges = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, idx) => {
+                const optElement = document.createElement('div');
+                optElement.className = `quiz-option bg-white border border-amber-200 rounded-xl p-3.5 flex items-center gap-3 cursor-pointer shadow-sm`;
+                optElement.onclick = () => selectOption(idx);
+                optElement.id = `option-${idx}`;
+
+                optElement.innerHTML = `
+                    <div class="badge-box bg-amber-50 text-amber-900 border border-amber-200" id="badge-${idx}">${optionBadges[idx]}</div>
+                    <span class="font-semibold text-xs text-slate-800 flex-1">${optText}</span>
+                    <span id="icon-${idx}" class="text-sm"></span>
+                `;
+                container.appendChild(optElement);
+            });
+
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.innerText = 'Confirm Answer';
+            actionBtn.className = "w-full bg-bible-gold-light hover:bg-bible-gold text-bible-dark font-bold py-3.5 px-4 rounded-xl shadow transition-colors text-sm opacity-60 cursor-not-allowed";
+            actionBtn.disabled = true;
+        }
+
+        function selectOption(index) {
+            if (isAnswerConfirmed) return;
+
+            selectedOptionIndex = index;
+
+            quizQuestions[currentQuestionIndex].options.forEach((_, idx) => {
+                const card = document.getElementById(`option-${idx}`);
+                const badge = document.getElementById(`badge-${idx}`);
+                
+                if (idx === index) {
+                    card.className = "quiz-option bg-amber-100 border-2 border-amber-500 rounded-xl p-3.5 flex items-center gap-3 cursor-pointer shadow-sm";
+                    badge.className = "badge-box bg-amber-600 text-white border border-amber-600";
+                } else {
+                    card.className = "quiz-option bg-white border border-amber-200 rounded-xl p-3.5 flex items-center gap-3 cursor-pointer shadow-sm";
+                    badge.className = "badge-box bg-amber-50 text-amber-900 border border-amber-200";
+                }
+            });
+
+            const actionBtn = document.getElementById('action-btn');
+            actionBtn.className = "w-full bg-bible-gold-light hover:bg-bible-gold text-bible-dark font-bold py-3.5 px-4 rounded-xl shadow transition-colors text-sm";
+            actionBtn.disabled = false;
+        }
+
+        function handleQuizAction() {
+            if (selectedOptionIndex === null) return;
+
+            const q = quizQuestions[currentQuestionIndex];
+
+            if (!isAnswerConfirmed) {
+                isAnswerConfirmed = true;
+                const isCorrect = selectedOptionIndex === q.correctIndex;
+
+                if (isCorrect) {
+                    userScore++;
+                }
+
+                q.options.forEach((_, idx) => {
+                    const card = document.getElementById(`option-${idx}`);
+                    const badge = document.getElementById(`badge-${idx}`);
+                    const iconSpan = document.getElementById(`icon-${idx}`);
+
+                    if (idx === q.correctIndex) {
+                        card.className = "quiz-option bg-emerald-100 border-2 border-emerald-600 rounded-xl p-3.5 flex items-center gap-3 shadow-sm text-emerald-900";
+                        badge.className = "badge-box bg-emerald-700 text-white border border-emerald-700";
+                        iconSpan.innerHTML = '<i class="fa-solid fa-check text-emerald-700 font-bold"></i>';
+                    } else if (idx === selectedOptionIndex && !isCorrect) {
+                        card.className = "quiz-option bg-rose-100 border-2 border-rose-500 rounded-xl p-3.5 flex items-center gap-3 shadow-sm text-rose-900";
+                        badge.className = "badge-box bg-rose-600 text-white border border-rose-600";
+                        iconSpan.innerHTML = '<i class="fa-solid fa-xmark text-rose-600 font-bold"></i>';
+                    }
+                });
+
+                const actionBtn = document.getElementById('action-btn');
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    actionBtn.innerText = 'Next Question';
+                } else {
+                    actionBtn.innerText = 'Submit';
+                }
+            } else {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizQuestions.length) {
+                    loadQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 60;
+            updateTimerDisplay();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('quiz-timer').innerText = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            const totalQuestions = 25;
+            const simulatedScore = 20;
+            const percentage = Math.round((simulatedScore / totalQuestions) * 100);
+
+            document.getElementById('res-score-num').innerText = simulatedScore;
+            document.getElementById('res-faith-points').innerText = `+${simulatedScore * 4}`;
+            document.getElementById('res-accuracy-val').innerText = `${percentage}%`;
+
+            const progressCircle = document.getElementById('result-progress-ring');
+            progressCircle.style.background = `conic-gradient(#d4af37 0% ${percentage}%, #1e5246 ${percentage}% 100%)`;
+
+            showScreen('screen-results');
+        }
+
+        function switchTab(tabName) {
+            if (tabName === 'bible') {
+                showScreen('screen-landing');
+            } else {
+                alert(`Navigating to ${tabName} tab...`);
+            }
+        }
+    </script>
+</body>
+</html>
