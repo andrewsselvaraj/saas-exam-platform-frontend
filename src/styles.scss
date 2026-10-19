@@ -44,3 +44,35 @@ button {
   font: inherit;
   cursor: pointer;
 }
+
+// Phone-width column every screen is laid out in.
+.page {
+  position: relative;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background-color: var(--bible-dark);
+  display: flex;
+  flex-direction: column;
+}
+
+.top-bar {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  padding: 0;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: var(--bible-gold);
+  }
+}

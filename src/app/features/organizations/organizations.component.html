@@ -1,0 +1,43 @@
+<div class="page">
+  <header class="top-bar">
+    <a class="icon-btn" routerLink="/" aria-label="Back to home">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div class="title">
+      <h1>Organisations</h1>
+      @if (state() === 'loaded') {
+        <p>{{ organizations().length }} {{ organizations().length === 1 ? 'organisation' : 'organisations' }}</p>
+      }
+    </div>
+    <span class="spacer"></span>
+  </header>
+
+  <main class="content">
+    @switch (state()) {
+      @case ('loading') {
+        <p class="message"><i class="fa-solid fa-spinner fa-spin"></i> Loading organisations…</p>
+      }
+      @case ('error') {
+        <div class="message">
+          <p>{{ errorMessage() }}</p>
+          <button type="button" class="retry" (click)="load()">Try again</button>
+        </div>
+      }
+      @case ('loaded') {
+        @for (org of organizations(); track org.id) {
+          <article class="org-card">
+            <div class="org-icon"><i class="fa-solid fa-church"></i></div>
+            <div class="org-body">
+              <h2>{{ org.name }}</h2>
+              <a class="org-email" [href]="'mailto:' + org.email">{{ org.email }}</a>
+              <p class="org-meta">Updated {{ org.updatedOn | date: 'mediumDate' }} by {{ org.updatedBy }}</p>
+            </div>
+            <span class="status" [class.inactive]="!isActive(org)">{{ isActive(org) ? 'Active' : 'Inactive' }}</span>
+          </article>
+        } @empty {
+          <p class="message">No organisations yet.</p>
+        }
+      }
+    }
+  </main>
+</div>

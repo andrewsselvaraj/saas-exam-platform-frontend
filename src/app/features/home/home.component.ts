@@ -1,5 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { Location } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 interface QuickLink {
   label: string;
@@ -15,6 +16,7 @@ interface NavTab {
 @Component({
   selector: 'app-home',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
@@ -50,8 +52,6 @@ export class HomeComponent {
 
   // Quiz, event, leaderboard and rewards screens are not built yet.
   startTodaysQuiz(): void {}
-
-  exploreQuizzes(): void {}
 
   viewEvent(): void {}
 
